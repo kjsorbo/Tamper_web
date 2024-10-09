@@ -1,80 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WiFi Configuration</title>
+    <title>Wi-Fi Configuration</title>
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
+        body {
             font-family: Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: url('https://raw.githubusercontent.com/kjsorbo/Tamper_web/main/background.jpg') no-repeat center center fixed;
+            background-image: url("https://kjsorbo.github.io/Tamper_web/Background.jpeg");
             background-size: cover;
+            color: #333;
         }
 
-        .form-container {
-            background: rgba(255, 255, 255, 0.7); /* Add transparency */
-            padding: 20px;
+        .container {
+            background: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
-            width: 300px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            width: 50%;
+            margin: 50px auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        h1 {
+        h2 {
             text-align: center;
+        }
+
+        .form-group {
+            margin: 15px 0;
         }
 
         label {
             display: block;
-            margin-top: 10px;
+            margin-bottom: 5px;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], select {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            margin-bottom: 10px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
 
-        button {
+        input[type="submit"] {
             width: 100%;
             padding: 10px;
-            background-color: #4CAF50;
-            color: white;
             border: none;
             border-radius: 5px;
+            background: #007bff;
+            color: white;
+            font-size: 16px;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: #45a049;
+        input[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        .dropdown {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h1>WiFi Config</h1>
-        <form action="/save" method="POST">
-            <label for="ssid">WiFi SSID:</label>
-            <input type="text" id="ssid" name="ssid" required>
-
-            <label for="password">WiFi Password:</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="hostname">Azure Hostname:</label>
-            <input type="text" id="hostname" name="hostname" required>
-
-            <label for="deviceid">Azure Device ID:</label>
-            <input type="text" id="deviceid" name="deviceid" required>
-
-            <button type="submit">Save Configuration</button>
+    <div class="container">
+        <h2>Wi-Fi Configuration</h2>
+        <form id="wifiForm" action="/submit" method="post">
+            <div class="form-group">
+                <label for="ssid">Available Networks</label>
+                <select id="ssid" name="ssid" class="dropdown">
+                    <option value="">Select a network...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="password">Wi-Fi Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter Wi-Fi password">
+            </div>
+            <div class="form-group">
+                <label for="hubname">Azure IoT Hub Name</label>
+                <input type="text" id="hubname" name="hubname" placeholder="Enter IoT Hub Name">
+            </div>
+            <div class="form-group">
+                <label for="deviceid">Device ID</label>
+                <input type="text" id="deviceid" name="deviceid" placeholder="Enter Device ID">
+            </div>
+            <div class="form-group">
+                <label for="sas">SAS Key</label>
+                <input type="text" id="sas" name="sas" placeholder="Enter SAS Key">
+            </div>
+            <input type="submit" value="Connect">
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/scan_wifi')
+                .then(response => response.json())
+                .then(data => populateSSIDDropdown(data))
+                .catch(error => console.error('Error fetching Wi-Fi networks:', error));
+        });
+
+        function populateSSIDDropdown(networks) {
+            const ssidSelect = document.getElementById('ssid');
+            networks.forEach(network => {
+                const option = document.createElement('option');
+                option.value = network.ssid;
+                option.text = `${network.ssid} (Signal: ${network.rssi} dBm, Encryption: ${network.encryption})`;
+                ssidSelect.appendChild(option);
+            });
+        }
+    </script>
 </body>
 </html>
